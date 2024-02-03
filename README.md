@@ -1,1 +1,3 @@
-# cp_1_3
+# Assignment 2 Task 3
+
+Wave equation
