@@ -31,7 +31,7 @@ r_0_x = 0.5
 r_0_y = 0.5
 
 # Simulation paras:
-border_cells_per_side = 1   
+border_cells_per_side = 2  
 # cells added at both spaces border to calculate at the borders
 t_offset = 2               
 # the first two point of times are needed to initalize the the simulation

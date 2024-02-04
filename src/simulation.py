@@ -10,7 +10,7 @@ from .opt_inital_distr import initial_sin
 class Simulation:
     def __init__(self,func_u_0):
         # border cells for the edge of the calculation
-        self.bc = c.border_cells_per_side + 1
+        self.bc = c.border_cells_per_side
         # +1 to use the -1 for the last relevant index
         self.x_dim   = c.n_x + (self.bc * 2)
         self.y_dim   = c.n_y + (self.bc * 2)
@@ -73,7 +73,8 @@ class Simulation:
                     )  # part of both x and y:
                     - 4 *     self.U[ i_t-1, self.bc    :-self.bc   , self.bc    :-self.bc   , ] 
                 )
-        #TODO: do i need to implement the border condition here? Is it already part of it ?
+        # Due to the limited scope of each calculation in the x, and y space (bc:-bc)
+        # we we already fullfilled the boundary condtions.
     
     def plot(self,z_lim=1.1):
         fig  =  plt.figure(figsize = (12, 5))
