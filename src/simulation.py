@@ -4,33 +4,33 @@ from mpl_toolkits.mplot3d import Axes3D
 from ipywidgets import interact
 
 # custom files
-from . import config as c
 from .opt_inital_distr import initial_sin
 
 class Simulation:
-    def __init__(self,func_u_0):
+    def __init__(self,func_u_0,config):
+        self.c = config
         # border cells for the edge of the calculation
-        self.bc = c.border_cells_per_side
+        self.bc = self.c.border_cells_per_side
         # +1 to use the -1 for the last relevant index
-        self.x_dim   = c.n_x + (self.bc * 2)
-        self.y_dim   = c.n_y + (self.bc * 2)
-        self.t_dim   = c.n_t + c.t_offset
+        self.x_dim   = self.c.n_x + (self.bc * 2)
+        self.y_dim   = self.c.n_y + (self.bc * 2)
+        self.t_dim   = self.c.n_t + self.c.t_offset
 
         # initalize U 
         # array of matricies
         self.U = np.zeros(( self.t_dim , self.x_dim , self.y_dim ))
 
         # arrays
-        x              = np.linspace( c.x_min, c.x_max, c.n_x ) 
-        y              = np.linspace( c.y_min, c.y_max, c.n_y ) 
+        x              = np.linspace( self.c.x_min, self.c.x_max, self.c.n_x ) 
+        y              = np.linspace( self.c.y_min, self.c.y_max, self.c.n_y ) 
          # meshgrid for broadcasting calculation
         self.X, self.Y = np.meshgrid( x, y)                    
 
         # t is just needed for plotting
         self.t   = np.linspace(
-                (c.t_min - c.t_offset * c.dt),
-                c.t_max,
-                c.n_t + c.t_offset,
+                (self.c.t_min - self.c.t_offset * self.c.dt),
+                self.c.t_max,
+                self.c.n_t + self.c.t_offset,
             ) 
         # adjusting, so that the simulation starts at t_min
         
@@ -39,7 +39,7 @@ class Simulation:
         self.U[ 0, self.bc:-self.bc, self.bc:-self.bc ] = func_u_0( self.X , self.Y )
 
         # calculate the constant 
-        self.alpha = c.dt**2 * c.c_c**2 / c.dx**2
+        self.alpha = self.c.dt**2 * self.c.c_c**2 / self.c.dx**2
         # here we use the assumption that c.dx == c.dy
         
         # Set up t=1 second condition (du/dt = 0 for t = 0 => t=1 calculated differently)
@@ -59,7 +59,7 @@ class Simulation:
     def run(self):
         # iterate through time
         # only start after the inital conditions (c.t_offset)
-        for i_t in range( c.t_offset, self.t_dim ):
+        for i_t in range( self.c.t_offset, self.t_dim ):
             self.U[ i_t, self.bc:-self.bc, self.bc:-self.bc ] = \
                 + 2 * self.U[ i_t-1, self.bc:-self.bc, self.bc:-self.bc ] \
                 - 1 * self.U[ i_t-2, self.bc:-self.bc, self.bc:-self.bc ] \
@@ -85,12 +85,12 @@ class Simulation:
         axs = [ ax0, ax1, ax2 ]
         times = [
             0,              # start point
-            int(c.n_t/2),   # half way through
-            c.n_t -1,          # end of simulation
+            int(self.c.n_t/2),   # half way through
+            self.c.n_t -1,          # end of simulation
         ]
         # adjust for offset
-        if c.t_offset !=0 :
-            times = [t_i + c.t_offset for t_i in times]
+        if self.c.t_offset !=0 :
+            times = [t_i + self.c.t_offset for t_i in times]
 
         # plot everything
         for ax, t_i in zip(axs,times): 
@@ -109,8 +109,8 @@ class Simulation:
             ax.plot_surface(self.X, self.Y, self.U[ t, self.bc:-self.bc, self.bc:-self.bc,])
             ax.set_zlim(-z_lim, z_lim)
 
-            plt.title(f"at $t={t*c.dt}$")
-        interact(plotter, t = (0, c.n_t + c.t_offset -1, t_i_steps));
+            plt.title(f"at $t={t*self.c.dt}$")
+        interact(plotter, t = (0, self.c.n_t + self.c.t_offset -1, t_i_steps));
 
 
 if __name__ == "__main__":

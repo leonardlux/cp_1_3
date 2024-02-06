@@ -1,3 +1,4 @@
+# Standard Parameters
 
 # Parameters of our space:
 x_min   = 0
@@ -36,3 +37,48 @@ border_cells_per_side = 2
 t_offset = 2               
 # the first two point of times are needed to initalize the the simulation
 # they are therefore not yet part of the distribution 
+
+class Config:
+    def __init__(self) -> None:
+        self.x_min  = x_min
+        self.x_max  = x_max
+        self.dx     = dx
+        self.n_x     = int( ( self.x_max - self.x_min ) / self.dx + 1 )
+        # n_x is the amount of points for x on the spere (include 0 => +1)
+        # or [x_min,x_max] not (x_min,x_max]
+
+        # we just assume a square
+        self.y_min   = self.x_min
+        self.y_max   = self.x_max
+        self.dy      = self.dx
+        self.n_y     = int( ( self.y_max - self.y_min ) / self.dy + 1 )
+
+        assert dx == dy
+        # we used this assumption in the simulation
+
+        # time 
+        self.t_min   = t_min
+        self.t_max   = t_max
+        self.dt      = dt
+        self.n_t     = int (( self.t_max - self.t_min ) / self.dt + 1)
+
+        # Speed of wave:
+        self.c_c = c_c # c constant
+
+        # Task 3.4
+        self.sigma = sigma
+        self.r_0_x = r_0_x
+        self.r_0_y = r_0_y
+
+        # Simulation paras:
+        self.border_cells_per_side = border_cells_per_side  
+        # cells added at both spaces border to calculate at the borders
+        self.t_offset = t_offset 
+        pass
+
+    def recalc(self): 
+        self.n_x     = int( ( self.x_max - self.x_min ) / self.dx + 1 )
+        self.n_y     = int( ( self.y_max - self.y_min ) / self.dy + 1 )
+        self.n_t     = int (( self.t_max - self.t_min ) / self.dt + 1)
+
+        pass
