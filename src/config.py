@@ -1,3 +1,5 @@
+import numpy as np
+
 # Standard Parameters
 
 # Parameters of our space:
@@ -43,24 +45,18 @@ class Config:
         self.x_min  = x_min
         self.x_max  = x_max
         self.dx     = dx
-        self.n_x     = int( ( self.x_max - self.x_min ) / self.dx + 1 )
-        # n_x is the amount of points for x on the spere (include 0 => +1)
-        # or [x_min,x_max] not (x_min,x_max]
+        self.n_x    = n_x
 
-        # we just assume a square
-        self.y_min   = self.x_min
-        self.y_max   = self.x_max
-        self.dy      = self.dx
-        self.n_y     = int( ( self.y_max - self.y_min ) / self.dy + 1 )
-
-        assert dx == dy
-        # we used this assumption in the simulation
+        self.y_min   = y_min
+        self.y_max   = y_max
+        self.dy      = dy
+        self.n_y     = n_y
 
         # time 
         self.t_min   = t_min
         self.t_max   = t_max
         self.dt      = dt
-        self.n_t     = int (( self.t_max - self.t_min ) / self.dt + 1)
+        self.n_t     = n_t
 
         # Speed of wave:
         self.c_c = c_c # c constant
@@ -81,4 +77,18 @@ class Config:
         self.n_y     = int( ( self.y_max - self.y_min ) / self.dy + 1 )
         self.n_t     = int (( self.t_max - self.t_min ) / self.dt + 1)
 
+        pass
+
+    def test_stability(self):
+        h = self.dx
+        dt = self.dt
+        c = self.c_c
+        print("Numerical threshold anaylsis:")
+        print(f"{h=}")
+        print(f"{dt=}")
+        print(f"{c=}")
+        print("Equation: ")
+        print(f"A = h/dt = {(h/dt):.3f}")
+        print(f"B = c * √2 = {(c * np.sqrt(2)):.3f}")
+        print(f"A > B: {h/dt > c * np.sqrt(2) }")
         pass
