@@ -76,41 +76,86 @@ class Simulation:
         # Due to the limited scope of each calculation in the x, and y space (bc:-bc)
         # we we already fullfilled the boundary condtions.
     
-    def plot(self,z_lim=1.1):
+    def plot(self,z_lim=1.1,analy=False, times = [],save_to = ""):
+        def analy_sol(x,y,t):
+            return np.cos(np.sqrt(5)*np.pi*self.c.dt* t) * np.sin(np.pi * x) * np.sin(2* np.pi * y)
+
         fig  =  plt.figure(figsize = (12, 5))
         ax0  = fig.add_subplot(131, projection = '3d')
         ax1  = fig.add_subplot(132, projection = '3d')
         ax2  = fig.add_subplot(133, projection = '3d')
 
         axs = [ ax0, ax1, ax2 ]
-        times = [
-            0,              # start point
-            int(self.c.n_t/2),   # half way through
-            self.c.n_t -1,          # end of simulation
-        ]
+        if times == []:
+            times = [
+                0,              # start point
+                int(self.c.n_t/2),   # half way through
+                self.c.n_t -1,          # end of simulation
+            ]
         # adjust for offset
         if self.c.t_offset !=0 :
             times = [t_i + self.c.t_offset for t_i in times]
 
         # plot everything
-        for ax, t_i in zip(axs,times): 
+        for ax, t_i in zip(axs,times):
+            ax.set_title(f"t = {self.c.dt*(t_i - self.c.t_offset)}")
+            ax.plot_surface(
+                self.X, 
+                self.Y, 
+                self.U[ t_i, self.bc:-self.bc, self.bc:-self.bc,],
+                label="numerical",
+                )
+            ax.set_zlim(-z_lim, z_lim)
+            if analy: 
+                ax.plot_surface(
+                    self.X, 
+                    self.Y, 
+                    analy_sol(self.X,self.Y,t_i),
+                    label="analytical",
+                    alpha= 0.7,
+                    )
+                plt.legend()
+
+            ax.set_xlabel("$x$")
+            ax.set_ylabel("$y$")
+            ax.set_zlabel("$u(x,y,t)$")
+
+        if save_to =="":
+            plt.show()
+        else:
+            plt.savefig(save_to)
+    
+    def plot_interactive(self,t_i_steps=100,z_lim=1.1,analy=False,diff=False):
+        def analy_sol(x,y,t):
+            return np.cos(np.sqrt(5)*np.pi*self.c.dt* t) * np.sin(np.pi * x) * np.sin(2* np.pi * y)
+        def plotter(t_i):
+            t_i = int(t_i)
+            fig  =  plt.figure(figsize = (12, 5))
+            ax  = fig.add_subplot(1,2,1,projection = '3d')
+            
             ax.plot_surface(self.X, self.Y, self.U[ t_i, self.bc:-self.bc, self.bc:-self.bc,])
             ax.set_zlim(-z_lim, z_lim)
+            if analy: 
+                ax.plot_surface(
+                    self.X, 
+                    self.Y, 
+                    analy_sol(self.X,self.Y,t_i),
+                    label="analytical",
+                    alpha= 0.7,
+                    )
+            if diff:
 
+                ax2  = fig.add_subplot(1,2,2,projection = '3d')
+                ax2.plot_surface(
+                    self.X, 
+                    self.Y, 
+                    (self.U[ t_i, self.bc:-self.bc, self.bc:-self.bc,] - analy_sol(self.X,self.Y,t_i))/np.max(self.U[ t_i, self.bc:-self.bc, self.bc:-self.bc,])*100 ,
+                    )
+                
+            
 
-        plt.tight_layout()
-        plt.show()
-    
-    def plot_interactive(self,t_i_steps=100,z_lim=1.1):
-        def plotter(t):
-            t = int(t)
-            fig  =  plt.figure(figsize = (12, 5))
-            ax  = fig.add_subplot(projection = '3d')
-            ax.plot_surface(self.X, self.Y, self.U[ t, self.bc:-self.bc, self.bc:-self.bc,])
-            ax.set_zlim(-z_lim, z_lim)
-
-            plt.title(f"at $t={t*self.c.dt}$")
-        interact(plotter, t = (0, self.c.n_t + self.c.t_offset -1, t_i_steps));
+            plt.title(f"at $t={t_i*self.c.dt}$")
+        interact(plotter, t_i = (0, self.c.n_t + self.c.t_offset -1, t_i_steps));
 
 
 if __name__ == "__main__":
